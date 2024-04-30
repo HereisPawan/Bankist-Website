@@ -115,3 +115,48 @@ nav.addEventListener('mouseover', handleOver.bind(0.5));
 
 //To remove the fade out effect when mouse is out of navlink
 nav.addEventListener('mouseout', handleOver.bind(1));
+
+//To enable sticky Navigation
+const header = document.querySelector('.header');
+const navHeight = nav.getBoundingClientRect().height;
+
+const stickyNav = function(entries){
+    const [entry] = entries;
+    console.log(entry);
+    if(!entry.isIntersecting){
+        nav.classList.add('sticky');
+    }
+    else{
+        nav.classList.remove('sticky');
+    }
+}
+
+const headerObserver = new IntersectionObserver( stickyNav, {
+    root: null,
+    threshold: 0,
+    rootmargin: `-${navHeight}px`,
+});
+headerObserver.observe(header);
+
+// Reveal Sections with Animation
+const allSections = document.querySelectorAll('.section')
+
+const revealSection = function(entries, observer) {
+    const [entry] = entries;
+    console.log(entry);
+    if(!entry.isIntersecting) return;
+    entry.target.classList.remove('section--hidden');
+
+    observer.unobserve(entry.target);
+}
+
+const sectionObserver = new IntersectionObserver(revealSection, {
+    root: null,
+    threshold: 0.15,
+});
+
+//Add hidden class using Js because some people disable Js in their browser so we should not add hidden class in HTML
+allSections.forEach((section)=>{
+    sectionObserver.observe(section);
+    section.classList.add('section--hidden');
+})
