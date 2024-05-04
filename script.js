@@ -160,3 +160,102 @@ allSections.forEach((section)=>{
     sectionObserver.observe(section);
     section.classList.add('section--hidden');
 })
+
+// Lazy Loading Images (To optimize web page to use lowest bandwidth)
+const imgTargets = document.querySelectorAll('img[data-src]');
+const loadImg = function(entries , observer){
+    const [entry] = entries;
+    console.log(entry);
+    if(!entry.isIntersecting) return;
+    entry.target.src=entry.target.dataset.src;
+    // entry.target.classList.remove('lazy-img'); We cant use it as in slow networks low quality image will load and class will get removed and the low quality image will remain there in view port until high quality image is downaloaded.
+    entry.target.addEventListener('load', function(){
+         entry.target.classList.remove('lazy-img');
+    });
+    observer.unobserve(entry.target);
+};
+
+const imgObserver = new IntersectionObserver(loadImg, {
+    root : null,
+    threshold : 0,
+    rootmargin : '200px'
+});
+
+imgTargets.forEach(imgTarget => imgObserver.observe(imgTarget));
+
+const slider = function(){
+//Building a Slider Component
+const slides = document.querySelectorAll('.slide');
+const btnLeft = document.querySelector('.slider__btn--left');
+const btnRight = document.querySelector('.slider__btn--right');
+let currentSlide = 0;
+const maxSlide = slides.length;
+
+//Create Dots and activate Dot function to assign the dot--active class to active dot in slide component .
+const dots = document.querySelector('.dots');
+
+const createDots = function(){
+    slides.forEach(function(_,i){
+        dots.insertAdjacentHTML(
+            'beforeend' , `<button class="dots__dot" data-slide="${i}"></button>`
+        );
+    })
+}
+
+createDots();
+
+const activateDot= function(slide){
+    document.querySelectorAll('.dots__dot ').forEach((d)=> d.classList.remove('dots__dot--active'));
+    document.querySelector(`.dots__dot[data-slide="${slide}"]`).classList.add('dots__dot--active');
+}
+
+const slideContent = function(slide){
+    slides.forEach((s,i)=>
+        (s.style.transform=`translateX(${100 * (i-slide)}%)`)
+    )
+    activateDot(currentSlide);
+}
+
+//To provide the translate properties to all slide elements
+slideContent(0);
+
+const nextSlide = function(){
+    if(maxSlide-1===currentSlide){
+        currentSlide=0;
+    }
+    else currentSlide++;
+    slideContent(currentSlide);
+}
+
+const prevSlide = function(){
+    if(currentSlide===0){
+        currentSlide=maxSlide-1;
+    }
+    else currentSlide--;
+    slideContent(currentSlide);
+}
+
+//To move to next slide when clicked on next arrow
+btnRight.addEventListener('click', nextSlide)
+//To move to previous slide when clicked on previous arrow
+btnLeft.addEventListener('click', prevSlide)
+
+//Move the slides using arrow keys of keyboard
+document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'){
+        nextSlide();
+    }
+    e.key=='ArrowLeft' && prevSlide();
+})
+
+//To open the slide according to the number of dot in which it is clicked
+dots.addEventListener('click',function(e){
+    if(e.target.classList.contains('dots__dot')){
+        let abc = e.target.dataset.slide;
+        slideContent(abc);
+        activateDot(abc);
+    }
+})
+};
+
+slider();
